@@ -68,18 +68,6 @@ export default function OnboardingWizard() {
     if (otherLunches.length === 0) otherLunches.push(...favLunches);
     if (otherDinners.length === 0) otherDinners.push(...favDinners);
     
-    const usedRecipeIds = new Set();
-
-    const getUniqueRecipe = (pool, fallback) => {
-      let available = pool.filter(r => !usedRecipeIds.has(r.id));
-      if (available.length === 0) {
-        available = pool; // fallback to allowing repeats if pool exhausted
-      }
-      const selected = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : fallback;
-      if (selected) usedRecipeIds.add(selected.id);
-      return selected;
-    };
-
     const menu = [];
     for (let i = 1; i <= days; i++) {
       // 50% chance to pick a favorite if available
@@ -97,8 +85,20 @@ export default function OnboardingWizard() {
       const safeFallbackLunch = uniqueAvailable.find(r => getMealType(r) === 'lunch' || getMealType(r) === 'both') || cloudRecipes[0];
       const safeFallbackDinner = uniqueAvailable.find(r => getMealType(r) === 'dinner' || getMealType(r) === 'both') || cloudRecipes[0];
       
-      const lunch = getUniqueRecipe(finalLunchPool, safeFallbackLunch);
-      const dinner = getUniqueRecipe(finalDinnerPool, safeFallbackDinner);
+      let lunch, dinner;
+      if (finalLunchPool.length > 0) {
+        const index = Math.floor(Math.random() * finalLunchPool.length);
+        lunch = finalLunchPool.splice(index, 1)[0];
+      } else {
+        lunch = safeFallbackLunch;
+      }
+
+      if (finalDinnerPool.length > 0) {
+        const index = Math.floor(Math.random() * finalDinnerPool.length);
+        dinner = finalDinnerPool.splice(index, 1)[0];
+      } else {
+        dinner = safeFallbackDinner;
+      }
       
       menu.push({ day: i, lunch: lunch.id, dinner: dinner.id });
     }
