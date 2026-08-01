@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-light text-brand-dark transition-colors duration-300;
+  }
+  .dark body {
+    @apply bg-brand-dark text-brand-light;
+  }
+}
+
+/* Micro-interactions */
+.btn-primary {
+  @apply bg-brand-terracotta text-white font-medium px-4 py-2 rounded-lg hover:bg-orange-700 active:scale-95 transition-all duration-200 shadow-sm;
+}
+.btn-secondary {
+  @apply bg-brand-mint text-brand-dark font-medium px-4 py-2 rounded-lg hover:bg-brand-sage active:scale-95 transition-all duration-200 shadow-sm;
+}
+.card {
+  @apply bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow duration-300 overflow-hidden;
+}
