@@ -18,22 +18,51 @@ export default function RecipeCatalog() {
   } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+  const [activeTab, setActiveTab] = useState('all');
 
   const allRecipes = [...cloudRecipes].filter(r => !deletedRecipes.includes(r.id));
 
-  const filteredRecipes = allRecipes.filter(recipe => 
-    recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recipe.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredRecipes = allRecipes.filter(recipe => {
+    const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          recipe.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const mealType = mealTypeOverrides[recipe.id] || recipe.mealType;
+    let matchesTab = true;
+    if (activeTab === 'lunch') matchesTab = mealType === 'lunch' || mealType === 'both';
+    if (activeTab === 'dinner') matchesTab = mealType === 'dinner' || mealType === 'both';
+    if (activeTab === 'dessert') matchesTab = mealType === 'dessert';
+    
+    return matchesSearch && matchesTab;
+  });
 
   const getRecipe = (id) => allRecipes.find(r => r.id === id);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
         <div>
           <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Catálogo de Recetas</h2>
           <p className="text-slate-500 mt-1">Explora {allRecipes.length} recetas y marca tus favoritas</p>
+        </div>
+        
+        {/* Pestañas de Filtrado */}
+        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-full sm:w-auto overflow-x-auto">
+          {['all', 'lunch', 'dinner', 'dessert'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
+                activeTab === tab 
+                  ? 'bg-white dark:bg-slate-700 text-brand-terracotta shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+            >
+              {tab === 'all' && '🍽️ Todas'}
+              {tab === 'lunch' && '☀️ Almuerzos'}
+              {tab === 'dinner' && '🌙 Cenas'}
+              {tab === 'dessert' && '🍰 Postres y Otros'}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -113,6 +142,7 @@ export default function RecipeCatalog() {
                       <option value="lunch">☀️ Comida</option>
                       <option value="dinner">🌙 Cena</option>
                       <option value="both">☀️🌙 Ambas</option>
+                      <option value="dessert">🍰 Postres y Otros</option>
                     </select>
                   </div>
                 </div>

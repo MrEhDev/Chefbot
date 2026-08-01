@@ -222,6 +222,7 @@ export default function RecipeFormModal({ onClose }) {
                 <select value={formData.mealType} onChange={e => setFormData({...formData, mealType: e.target.value})} className="w-full p-2.5 rounded-lg border dark:border-slate-700 bg-transparent">
                   <option value="lunch">Almuerzo</option>
                   <option value="dinner">Cena</option>
+                  <option value="dessert">Postres y Otros</option>
                 </select>
               </div>
               <div>

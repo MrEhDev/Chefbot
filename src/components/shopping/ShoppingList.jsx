@@ -1,14 +1,13 @@
 import React, { useMemo, useRef } from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import recipesData from '../../data/recipes.json';
 import { CheckCircle2, Circle, Copy, Download, ShoppingBasket } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 
 export default function ShoppingList() {
-  const { generatedMenu, userPreferences: { diners }, checkedItems, toggleCheckedItem, customRecipes } = useAppStore();
+  const { generatedMenu, userPreferences: { diners }, checkedItems, toggleCheckedItem, cloudRecipes } = useAppStore();
   const printRef = useRef();
 
-  const allRecipes = [...recipesData, ...(customRecipes || [])];
+  const allRecipes = cloudRecipes || [];
   const getRecipe = (id) => allRecipes.find(r => r.id === id);
 
   const consolidatedList = useMemo(() => {

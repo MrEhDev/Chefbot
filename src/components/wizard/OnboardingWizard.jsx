@@ -25,7 +25,8 @@ export default function OnboardingWizard() {
     if (step === 2 && tasteOptions.length === 0) {
       const loadOptions = async () => {
         setLoadingOptions(true);
-        let local = [...cloudRecipes].sort(() => 0.5 - Math.random());
+        const mealTypeOverrides = useAppStore.getState().mealTypeOverrides;
+        let local = [...cloudRecipes].filter(r => (mealTypeOverrides[r.id] || r.mealType) !== 'dessert').sort(() => 0.5 - Math.random());
         setTasteOptions(local.slice(0, 50));
         setLoadingOptions(false);
       };
@@ -81,8 +82,11 @@ export default function OnboardingWizard() {
       const finalDinnerPool = dinnerPool.length > 0 ? dinnerPool : uniqueAvailable.filter(r => getMealType(r) === 'dinner' || getMealType(r) === 'both');
 
       // If still empty, use fallback recipe
-      const lunch = finalLunchPool.length > 0 ? finalLunchPool[Math.floor(Math.random() * finalLunchPool.length)] : cloudRecipes[0];
-      const dinner = finalDinnerPool.length > 0 ? finalDinnerPool[Math.floor(Math.random() * finalDinnerPool.length)] : cloudRecipes[0];
+      const safeFallbackLunch = uniqueAvailable.find(r => getMealType(r) === 'lunch' || getMealType(r) === 'both') || cloudRecipes[0];
+      const safeFallbackDinner = uniqueAvailable.find(r => getMealType(r) === 'dinner' || getMealType(r) === 'both') || cloudRecipes[0];
+      
+      const lunch = finalLunchPool.length > 0 ? finalLunchPool[Math.floor(Math.random() * finalLunchPool.length)] : safeFallbackLunch;
+      const dinner = finalDinnerPool.length > 0 ? finalDinnerPool[Math.floor(Math.random() * finalDinnerPool.length)] : safeFallbackDinner;
       
       menu.push({ day: i, lunch: lunch.id, dinner: dinner.id });
     }
