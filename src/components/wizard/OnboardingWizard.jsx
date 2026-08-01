@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import recipesData from '../../data/recipes.json';
 import { ChevronRight, ChevronLeft, Users, Calendar, CheckCircle2, Loader2 } from 'lucide-react';
 import { isRecipeAllowed } from '../../utils/dietFilters';
 
@@ -19,20 +18,20 @@ export default function OnboardingWizard() {
   const [tasteOptions, setTasteOptions] = useState([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
   const favoriteRecipes = useAppStore((state) => state.favoriteRecipes);
-  const customRecipes = useAppStore((state) => state.customRecipes);
+  const cloudRecipes = useAppStore((state) => state.cloudRecipes);
   const deletedRecipes = useAppStore((state) => state.deletedRecipes) || [];
 
   useEffect(() => {
     if (step === 2 && tasteOptions.length === 0) {
       const loadOptions = async () => {
         setLoadingOptions(true);
-        let local = [...recipesData].sort(() => 0.5 - Math.random());
+        let local = [...cloudRecipes].sort(() => 0.5 - Math.random());
         setTasteOptions(local.slice(0, 50));
         setLoadingOptions(false);
       };
       loadOptions();
     }
-  }, [step]);
+  }, [step, cloudRecipes]);
 
   const handleNext = () => setStep(step + 1);
   const handlePrev = () => setStep(step - 1);
@@ -47,8 +46,7 @@ export default function OnboardingWizard() {
 
     const mealTypeOverrides = useAppStore.getState().mealTypeOverrides;
 
-    let allAvailable = [...recipesData, ...tasteOptions, ...customRecipes]
-      .filter(r => !deletedRecipes.includes(r.id));
+    let allAvailable = [...cloudRecipes].filter(r => !deletedRecipes.includes(r.id));
       
     // Remove duplicates by id
     const uniqueAvailable = Array.from(new Map(allAvailable.map(item => [item.id, item])).values());
@@ -83,8 +81,8 @@ export default function OnboardingWizard() {
       const finalDinnerPool = dinnerPool.length > 0 ? dinnerPool : uniqueAvailable.filter(r => getMealType(r) === 'dinner' || getMealType(r) === 'both');
 
       // If still empty, use fallback recipe
-      const lunch = finalLunchPool.length > 0 ? finalLunchPool[Math.floor(Math.random() * finalLunchPool.length)] : recipesData[0];
-      const dinner = finalDinnerPool.length > 0 ? finalDinnerPool[Math.floor(Math.random() * finalDinnerPool.length)] : recipesData[0];
+      const lunch = finalLunchPool.length > 0 ? finalLunchPool[Math.floor(Math.random() * finalLunchPool.length)] : cloudRecipes[0];
+      const dinner = finalDinnerPool.length > 0 ? finalDinnerPool[Math.floor(Math.random() * finalDinnerPool.length)] : cloudRecipes[0];
       
       menu.push({ day: i, lunch: lunch.id, dinner: dinner.id });
     }

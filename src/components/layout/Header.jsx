@@ -3,9 +3,8 @@ import { useAppStore } from '../../store/useAppStore';
 import { Moon, Sun, Utensils } from 'lucide-react';
 
 export default function Header({ currentTab, setCurrentTab }) {
-  const theme = useAppStore((state) => state.theme);
-  const toggleTheme = useAppStore((state) => state.toggleTheme);
-  const hasCompletedOnboarding = useAppStore((state) => state.hasCompletedOnboarding);
+  const [clickCount, setClickCount] = React.useState(0);
+  const { theme, toggleTheme, hasCompletedOnboarding, isAdmin, setIsAdmin } = useAppStore();
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -15,13 +14,29 @@ export default function Header({ currentTab, setCurrentTab }) {
     }
   }, [theme]);
 
+  const handleTitleClick = () => {
+    if (hasCompletedOnboarding) setCurrentTab('menu');
+    if (!isAdmin) {
+      const newCount = clickCount + 1;
+      setClickCount(newCount);
+      if (newCount >= 5) {
+        const pwd = prompt('Introduce contraseña de Administrador:');
+        if (pwd === 'admin123') {
+          setIsAdmin(true);
+          alert('¡Modo Administrador Activado!');
+        }
+        setClickCount(0);
+      }
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4">
       <div className="max-w-4xl mx-auto flex justify-between items-center">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => hasCompletedOnboarding && setCurrentTab('menu')}>
+        <div className="flex items-center gap-2 cursor-pointer select-none" onClick={handleTitleClick}>
           <Utensils className="text-brand-terracotta" />
           <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-terracotta to-orange-400 bg-clip-text text-transparent">
-            Chefbot
+            Chefbot {isAdmin && <span className="text-xs text-red-500 font-normal ml-1 border border-red-500 px-1 rounded">ADMIN</span>}
           </h1>
         </div>
         

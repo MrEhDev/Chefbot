@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { X, Plus, Trash2, Camera, Check, Link as LinkIcon, Loader2 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
+import { addRecipeToDB } from '../../services/apiFirebase';
 
 export default function RecipeFormModal({ onClose }) {
-  const addCustomRecipe = useAppStore(state => state.addCustomRecipe);
+  const cloudRecipes = useAppStore(state => state.cloudRecipes);
+  const setCloudRecipes = useAppStore(state => state.setCloudRecipes);
   const [importUrl, setImportUrl] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState('');
@@ -138,7 +140,7 @@ export default function RecipeFormModal({ onClose }) {
     setFormData({ ...formData, instructions: newInstructions });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newRecipe = {
       ...formData,
@@ -149,7 +151,12 @@ export default function RecipeFormModal({ onClose }) {
       image: formData.image || 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&q=80&w=400&h=300'
     };
     
-    addCustomRecipe(newRecipe);
+    // Optimistic update
+    setCloudRecipes([...cloudRecipes, newRecipe]);
+    
+    // Save to DB
+    await addRecipeToDB(newRecipe);
+    
     onClose();
   };
 

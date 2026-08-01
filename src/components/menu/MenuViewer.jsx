@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import recipesData from '../../data/recipes.json';
 import RecipeCard from './RecipeCard';
 import RecipeModal from './RecipeModal';
 import { RefreshCw, Save } from 'lucide-react';
@@ -8,16 +7,16 @@ import { RefreshCw, Save } from 'lucide-react';
 export default function MenuViewer() {
   const generatedMenu = useAppStore((state) => state.generatedMenu);
   const updateMeal = useAppStore((state) => state.updateMeal);
-  const customRecipes = useAppStore((state) => state.customRecipes);
+  const cloudRecipes = useAppStore((state) => state.cloudRecipes);
   const resetOnboarding = useAppStore((state) => state.resetOnboarding);
   const deletedRecipes = useAppStore((state) => state.deletedRecipes) || [];
   const swapMeals = useAppStore((state) => state.swapMeals);
   const mealTypeOverrides = useAppStore((state) => state.mealTypeOverrides);
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
 
-  const allRecipes = [...recipesData, ...customRecipes].filter(r => !deletedRecipes.includes(r.id));
+  const allRecipes = [...cloudRecipes].filter(r => !deletedRecipes.includes(r.id));
 
-  const getRecipe = (id) => allRecipes.find(r => r.id === id) || recipesData[0]; // fallback if api/custom recipe missing
+  const getRecipe = (id) => allRecipes.find(r => r.id === id) || cloudRecipes[0]; // fallback if api/custom recipe missing
 
   const swapRecipe = (day, mealType, currentRecipeId) => {
     const available = allRecipes.filter(r => {

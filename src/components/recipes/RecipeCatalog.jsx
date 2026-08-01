@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import recipesData from '../../data/recipes.json';
 import { Search, Heart, Trash2 } from 'lucide-react';
 import RecipeModal from '../menu/RecipeModal';
+import { deleteRecipeFromDB } from '../../services/apiFirebase';
 
 export default function RecipeCatalog() {
   const { 
-    customRecipes, 
+    cloudRecipes,
+    setCloudRecipes,
     favoriteRecipes, 
     toggleFavorite, 
     deletedRecipes = [], 
     deleteRecipe,
     mealTypeOverrides,
-    setMealTypeOverride
+    setMealTypeOverride,
+    isAdmin
   } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
 
-  const allRecipes = [...recipesData, ...customRecipes].filter(r => !deletedRecipes.includes(r.id));
+  const allRecipes = [...cloudRecipes].filter(r => !deletedRecipes.includes(r.id));
 
   const filteredRecipes = allRecipes.filter(recipe => 
     recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -82,17 +84,22 @@ export default function RecipeCatalog() {
                       className={isFavorite ? "fill-red-500 text-red-500" : "text-slate-400"} 
                     />
                   </button>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm(`¿Estás seguro de que quieres eliminar "${recipe.title}" del catálogo? No volverá a aparecer.`)) {
-                        deleteRecipe(recipe.id);
-                      }
-                    }}
-                    className="absolute top-3 left-3 p-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur rounded-full hover:bg-red-50 hover:text-red-500 transition-colors shadow-sm text-slate-400"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  {isAdmin && (
+                    <button 
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`¿Estás seguro de que quieres eliminar "${recipe.title}" del catálogo GLOBALMENTE? No volverá a aparecer para ningún usuario.`)) {
+                          const success = await deleteRecipeFromDB(recipe.id);
+                          if (success) {
+                            setCloudRecipes(cloudRecipes.filter(r => r.id !== recipe.id));
+                          }
+                        }
+                      }}
+                      className="absolute top-3 left-3 p-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-full hover:bg-red-50 hover:text-red-500 transition-colors shadow-sm text-red-400"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  )}
                   <div className="absolute bottom-3 left-3 flex gap-2">
                     <select
                       onClick={(e) => e.stopPropagation()}

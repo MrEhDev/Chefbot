@@ -8,7 +8,13 @@ export const useAppStore = create(
       theme: 'light',
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
 
-      // Custom Recipes State
+      // Cloud Recipes State
+      cloudRecipes: [],
+      setCloudRecipes: (recipes) => set({ cloudRecipes: recipes }),
+      isLoadingRecipes: true,
+      setIsLoadingRecipes: (loading) => set({ isLoadingRecipes: loading }),
+
+      // Custom Recipes State (deprecated, kept for local fallback)
       customRecipes: [],
       addCustomRecipe: (recipe) => set((state) => ({
         customRecipes: [...state.customRecipes, recipe]
@@ -22,7 +28,11 @@ export const useAppStore = create(
           : [...state.favoriteRecipes, recipeId]
       })),
 
-      // Deleted Recipes State (Blacklist)
+      // Admin State
+      isAdmin: false,
+      setIsAdmin: (val) => set({ isAdmin: val }),
+
+      // Deleted Recipes State (Blacklist - kept for local preferences if they don't want to see a global recipe)
       deletedRecipes: [],
       
       // Meal Type Overrides State
